@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:intl/intl.dart';
 
+import '../../core/theme/app_styles.dart';
 import '../domain/model/outfit_item.dart';
 import 'outfit_state.dart';
 import 'outfit_action.dart';
@@ -69,10 +70,10 @@ class _OutfitScreenState extends State<OutfitScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      backgroundColor: _getBackgroundColor(widget.state.temperature),
+      backgroundColor: AppColors.getTemperatureBackground(
+        widget.state.temperature,
+      ),
       body: widget.state.loadingStatus == WeatherLoadingStatus.loading
           ? _buildLoadingView()
           : widget.state.loadingStatus == WeatherLoadingStatus.error
@@ -82,21 +83,23 @@ class _OutfitScreenState extends State<OutfitScreen>
                 _refresh();
                 await Future.delayed(const Duration(milliseconds: 500));
               },
-              color: Colors.white,
-              backgroundColor: _getAccentColor(widget.state.temperature),
+              color: AppColors.textWhite,
+              backgroundColor: AppColors.getTemperatureAccent(
+                widget.state.temperature,
+              ),
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
                 ),
                 slivers: [
-                  _buildSliverAppBar(theme),
+                  _buildSliverAppBar(),
                   SliverToBoxAdapter(
                     child: Column(
                       children: [
-                        _buildTemperatureHero(theme),
-                        const SizedBox(height: 24),
-                        _buildOutfitRecommendations(theme),
-                        const SizedBox(height: 40),
+                        _buildTemperatureHero(),
+                        const SizedBox(height: AppSpacing.large),
+                        _buildOutfitRecommendations(),
+                        const SizedBox(height: AppSpacing.xxLarge),
                       ],
                     ),
                   ),
@@ -108,11 +111,11 @@ class _OutfitScreenState extends State<OutfitScreen>
 
   Widget _buildLoadingView() {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [const Color(0xFF4FACFE), const Color(0xFF00F2FE)],
+          colors: AppColors.coolGradient,
         ),
       ),
       child: SafeArea(
@@ -121,42 +124,33 @@ class _OutfitScreenState extends State<OutfitScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(AppSpacing.large),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
+                  color: AppColors.textWhite,
+                  borderRadius: AppRadius.extraLargeRadius,
+                  boxShadow: [AppShadows.large()],
                 ),
                 child: const Icon(
                   Icons.cloud_download_rounded,
                   size: 64,
-                  color: Color(0xFF4FACFE),
+                  color: AppColors.primary,
                 ),
               ),
-              const SizedBox(height: 32),
-              const Text(
+              const SizedBox(height: AppSpacing.xLarge),
+              Text(
                 '날씨 정보를 불러오는 중...',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  letterSpacing: -0.5,
+                style: AppTextStyles.headlineSmall.copyWith(
+                  color: AppColors.textWhite,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.medium),
               SizedBox(
                 width: 40,
                 height: 40,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    Colors.white.withOpacity(0.9),
+                    AppColors.textWhite.withOpacity(0.9),
                   ),
                 ),
               ),
@@ -173,80 +167,61 @@ class _OutfitScreenState extends State<OutfitScreen>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFFFF6B6B).withOpacity(0.8),
-            const Color(0xFFFFB347).withOpacity(0.8),
-          ],
+          colors: AppColors.veryHotGradient
+              .map((c) => c.withOpacity(0.8))
+              .toList(),
         ),
       ),
       child: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxLarge),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(AppSpacing.large),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
+                    color: AppColors.textWhite,
+                    borderRadius: AppRadius.extraLargeRadius,
+                    boxShadow: [AppShadows.large()],
                   ),
                   child: const Icon(
                     Icons.cloud_off_rounded,
                     size: 64,
-                    color: Color(0xFFFF6B6B),
+                    color: AppColors.error,
                   ),
                 ),
-                const SizedBox(height: 32),
-                const Text(
+                const SizedBox(height: AppSpacing.xLarge),
+                Text(
                   '날씨 정보를 불러올 수 없습니다',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
+                  style: AppTextStyles.headlineSmall.copyWith(
+                    color: AppColors.textWhite,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.small),
                 Text(
                   widget.state.errorMessage ?? '네트워크 연결을 확인해주세요',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.9),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textWhite.withOpacity(0.9),
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: AppSpacing.xxLarge),
                 ElevatedButton.icon(
                   onPressed: _refresh,
                   icon: const Icon(Icons.refresh_rounded, size: 24),
-                  label: const Text(
-                    '다시 시도하기',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
+                  label: Text('다시 시도하기', style: AppTextStyles.labelLarge),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFFFF6B6B),
+                    backgroundColor: AppColors.textWhite,
+                    foregroundColor: AppColors.error,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
+                      horizontal: AppSpacing.xLarge,
+                      vertical: AppSpacing.medium,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: AppRadius.mediumRadius,
                     ),
                     elevation: 4,
                     shadowColor: Colors.black.withOpacity(0.2),
@@ -260,7 +235,7 @@ class _OutfitScreenState extends State<OutfitScreen>
     );
   }
 
-  Widget _buildSliverAppBar(ThemeData theme) {
+  Widget _buildSliverAppBar() {
     return SliverAppBar(
       expandedHeight: 120,
       floating: false,
@@ -276,12 +251,19 @@ class _OutfitScreenState extends State<OutfitScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: _getGradientColors(widget.state.temperature),
+              colors: AppColors.getTemperatureGradient(
+                widget.state.temperature,
+              ),
             ),
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.large,
+                AppSpacing.medium,
+                AppSpacing.large,
+                AppSpacing.medium,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -289,23 +271,20 @@ class _OutfitScreenState extends State<OutfitScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         '옷차림표',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -1,
+                        style: AppTextStyles.headlineLarge.copyWith(
+                          color: AppColors.textWhite,
                         ),
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(16),
+                          color: AppColors.textWhite.withOpacity(0.2),
+                          borderRadius: AppRadius.mediumRadius,
                         ),
                         child: IconButton(
                           icon: const Icon(Icons.refresh_rounded),
-                          color: Colors.white,
+                          color: AppColors.textWhite,
                           iconSize: 24,
                           onPressed: _refresh,
                           tooltip: '새로고침',
@@ -322,7 +301,7 @@ class _OutfitScreenState extends State<OutfitScreen>
     );
   }
 
-  Widget _buildTemperatureHero(ThemeData theme) {
+  Widget _buildTemperatureHero() {
     return FadeTransition(
       opacity: _headerAnimation,
       child: SlideTransition(
@@ -331,18 +310,19 @@ class _OutfitScreenState extends State<OutfitScreen>
           end: Offset.zero,
         ).animate(_headerAnimation),
         child: Container(
-          margin: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-          padding: const EdgeInsets.all(32),
+          margin: const EdgeInsets.fromLTRB(
+            AppSpacing.large,
+            AppSpacing.large,
+            AppSpacing.large,
+            AppSpacing.large,
+          ),
+          padding: const EdgeInsets.all(AppSpacing.xLarge),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(32),
+            color: AppColors.textWhite,
+            borderRadius: AppRadius.xxLargeRadius,
             boxShadow: [
-              BoxShadow(
-                color: _getAccentColor(
-                  widget.state.temperature,
-                ).withOpacity(0.15),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
+              AppShadows.temperatureCard(
+                AppColors.getTemperatureAccent(widget.state.temperature),
               ),
             ],
           ),
@@ -358,16 +338,16 @@ class _OutfitScreenState extends State<OutfitScreen>
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
+                            horizontal: AppSpacing.small,
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: _getGradientColors(
+                              colors: AppColors.getTemperatureGradient(
                                 widget.state.temperature,
                               ),
                             ),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: AppRadius.smallRadius,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -375,7 +355,7 @@ class _OutfitScreenState extends State<OutfitScreen>
                               const Icon(
                                 Icons.access_time_rounded,
                                 size: 14,
-                                color: Colors.white,
+                                color: AppColors.textWhite,
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -386,56 +366,43 @@ class _OutfitScreenState extends State<OutfitScreen>
                                     : DateFormat(
                                         'M월d일 HH시mm분',
                                       ).format(DateTime.now()),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
+                                style: AppTextStyles.labelMedium.copyWith(
+                                  color: AppColors.textWhite,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSpacing.large),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               widget.state.temperature.toStringAsFixed(0),
-                              style: TextStyle(
-                                fontSize: 80,
-                                fontWeight: FontWeight.w900,
-                                color: _getAccentColor(
+                              style: AppTextStyles.displayLarge.copyWith(
+                                color: AppColors.getTemperatureAccent(
                                   widget.state.temperature,
                                 ),
-                                height: 0.9,
-                                letterSpacing: -3,
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Text(
                                 '°',
-                                style: TextStyle(
-                                  fontSize: 56,
-                                  fontWeight: FontWeight.w300,
-                                  color: _getAccentColor(
+                                style: AppTextStyles.displaySmall.copyWith(
+                                  color: AppColors.getTemperatureAccent(
                                     widget.state.temperature,
                                   ).withOpacity(0.7),
-                                  height: 1,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.small),
                         Text(
                           widget.state.weatherDescription,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF64748B),
-                            letterSpacing: 0.3,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -451,28 +418,26 @@ class _OutfitScreenState extends State<OutfitScreen>
                         child: Transform.rotate(
                           angle: (1 - value) * math.pi / 4,
                           child: Container(
-                            padding: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(AppSpacing.large),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: _getGradientColors(
+                                colors: AppColors.getTemperatureGradient(
                                   widget.state.temperature,
                                 ),
                               ),
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: AppRadius.extraLargeRadius,
                               boxShadow: [
-                                BoxShadow(
-                                  color: _getAccentColor(
+                                AppShadows.gradientCard(
+                                  AppColors.getTemperatureAccent(
                                     widget.state.temperature,
-                                  ).withOpacity(0.3),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 8),
+                                  ),
                                 ),
                               ],
                             ),
                             child: Icon(
                               _getWeatherIcon(widget.state.temperature),
                               size: 56,
-                              color: Colors.white,
+                              color: AppColors.textWhite,
                             ),
                           ),
                         ),
@@ -488,7 +453,7 @@ class _OutfitScreenState extends State<OutfitScreen>
     );
   }
 
-  Widget _buildOutfitRecommendations(ThemeData theme) {
+  Widget _buildOutfitRecommendations() {
     final categories = [
       if (widget.state.outers.isNotEmpty)
         ('아우터', Icons.checkroom_rounded, widget.state.outers),
@@ -508,19 +473,17 @@ class _OutfitScreenState extends State<OutfitScreen>
           end: Offset.zero,
         ).animate(_itemsAnimation),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.large),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 '추천 옷차림',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
+                style: AppTextStyles.headlineMedium.copyWith(
+                  color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.large),
               ...categories.asMap().entries.map((entry) {
                 final index = entry.key;
                 final (title, icon, items) = entry.value;
@@ -554,18 +517,12 @@ class _OutfitScreenState extends State<OutfitScreen>
     int index,
   ) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: AppSpacing.medium),
+      padding: const EdgeInsets.all(AppSpacing.large),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: AppColors.textWhite,
+        borderRadius: AppRadius.largeRadius,
+        boxShadow: [AppShadows.medium()],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -575,23 +532,23 @@ class _OutfitScreenState extends State<OutfitScreen>
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: _getCategoryGradient(index)),
+                  gradient: LinearGradient(
+                    colors: AppColors.getCategoryGradient(index),
+                  ),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(icon, size: 22, color: Colors.white),
+                child: Icon(icon, size: 22, color: AppColors.textWhite),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.small),
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.3,
+                style: AppTextStyles.titleLarge.copyWith(
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.medium),
           Wrap(
             spacing: 10,
             runSpacing: 10,
@@ -619,64 +576,31 @@ class _OutfitScreenState extends State<OutfitScreen>
 
   Widget _buildOutfitChip(OutfitItem item, int categoryIndex) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.medium,
+        vertical: 10,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: _getCategoryGradient(
+          colors: AppColors.getCategoryGradient(
             categoryIndex,
           ).map((c) => c.withOpacity(0.1)).toList(),
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.smallRadius,
         border: Border.all(
-          color: _getCategoryGradient(categoryIndex)[0].withOpacity(0.3),
+          color: AppColors.getCategoryGradient(
+            categoryIndex,
+          )[0].withOpacity(0.3),
           width: 1.5,
         ),
       ),
       child: Text(
         item.name,
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: _getCategoryGradient(categoryIndex)[0],
-          letterSpacing: -0.2,
+        style: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.getCategoryGradient(categoryIndex)[0],
         ),
       ),
     );
-  }
-
-  Color _getBackgroundColor(double temp) {
-    if (temp >= 28) return const Color(0xFFFFF5E6);
-    if (temp >= 20) return const Color(0xFFFFF9F0);
-    if (temp >= 9) return const Color(0xFFF5F8FF);
-    if (temp >= 0) return const Color(0xFFEEF5FF);
-    return const Color(0xFFE8F0F8);
-  }
-
-  List<Color> _getGradientColors(double temp) {
-    if (temp >= 28) {
-      return [const Color(0xFFFF6B6B), const Color(0xFFFFB347)];
-    } else if (temp >= 20) {
-      return [const Color(0xFFFFB347), const Color(0xFFFFD93D)];
-    } else if (temp >= 9) {
-      return [const Color(0xFF6BCF7F), const Color(0xFF4ECDC4)];
-    } else if (temp >= 0) {
-      return [const Color(0xFF4ECDC4), const Color(0xFF4A90E2)];
-    }
-    return [const Color(0xFF4A90E2), const Color(0xFF7B68EE)];
-  }
-
-  Color _getAccentColor(double temp) {
-    return _getGradientColors(temp)[0];
-  }
-
-  List<Color> _getCategoryGradient(int index) {
-    const gradients = [
-      [Color(0xFF667EEA), Color(0xFF764BA2)],
-      [Color(0xFFF093FB), Color(0xFFF5576C)],
-      [Color(0xFF4FACFE), Color(0xFF00F2FE)],
-      [Color(0xFFFA709A), Color(0xFFFEE140)],
-    ];
-    return gradients[index % gradients.length];
   }
 
   IconData _getWeatherIcon(double temp) {
