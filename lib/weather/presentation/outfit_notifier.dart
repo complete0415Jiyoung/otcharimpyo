@@ -1,6 +1,11 @@
+import 'package:flutter/foundation.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/model/outfit_item.dart';
+import '../domain/usecase/get_current_weather_use_case.dart';
+import '../data/data_source/weather_data_source.dart';
+import '../data/repository_impl/weather_repository_impl.dart';
 import 'outfit_state.dart';
 import 'outfit_action.dart';
 
@@ -8,10 +13,21 @@ part 'outfit_notifier.g.dart';
 
 @riverpod
 class OutfitNotifier extends _$OutfitNotifier {
+  late final GetCurrentWeatherUseCase _getWeatherUseCase;
+
   @override
   OutfitState build() {
-    final state = const OutfitState();
-    return _applyOutfit(state, state.temperature);
+    // DI 구성
+    final weatherDataSource = WeatherDataSource();
+    final weatherRepository = WeatherRepositoryImpl(
+      dataSource: weatherDataSource,
+    );
+    _getWeatherUseCase = GetCurrentWeatherUseCase(weatherRepository);
+
+    // 초기 로딩
+    Future.microtask(() => _loadWeatherAndOutfit());
+
+    return const OutfitState();
   }
 
   Future<void> onAction(OutfitAction action) async {
@@ -19,7 +35,64 @@ class OutfitNotifier extends _$OutfitNotifier {
       case OnChangeTemperature(:final temperature):
         state = _applyOutfit(state, temperature);
       case OnRefreshOutfit():
-        state = _applyOutfit(state, state.temperature);
+        await _loadWeatherAndOutfit();
+    }
+  }
+
+  Future<void> _loadWeatherAndOutfit() async {
+    // 로딩 상태로 변경
+    state = state.copyWith(loadingStatus: WeatherLoadingStatus.loading);
+
+    try {
+      // 위치 권한 확인
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        debugPrint('위치 권한이 없습니다');
+        state = state.copyWith(
+          loadingStatus: WeatherLoadingStatus.error,
+          errorMessage: '위치 권한이 필요합니다',
+        );
+        return;
+      }
+
+      // 현재 위치 가져오기
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      // 날씨 정보 가져오기
+      final weatherResult = await _getWeatherUseCase.execute(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (weatherResult.hasValue) {
+        final weather = weatherResult.value!;
+        state = state.copyWith(
+          temperature: weather.temp,
+          weatherDescription: weather.description,
+          lastUpdated: DateTime.now(),
+          loadingStatus: WeatherLoadingStatus.success,
+          errorMessage: null,
+        );
+        state = _applyOutfit(state, weather.temp);
+      } else if (weatherResult.hasError) {
+        debugPrint('날씨 조회 실패: ${weatherResult.error}');
+        state = state.copyWith(
+          loadingStatus: WeatherLoadingStatus.error,
+          errorMessage: '날씨 정보를 불러오는데 실패했습니다',
+        );
+      }
+    } catch (e) {
+      debugPrint('날씨 및 옷차림 로딩 실패: $e');
+      state = state.copyWith(
+        loadingStatus: WeatherLoadingStatus.error,
+        errorMessage: '날씨 정보를 불러오는데 실패했습니다',
+      );
     }
   }
 
@@ -30,8 +103,9 @@ class OutfitNotifier extends _$OutfitNotifier {
       tops: items.where((e) => e.category == OutfitCategory.top).toList(),
       bottoms: items.where((e) => e.category == OutfitCategory.bottom).toList(),
       outers: items.where((e) => e.category == OutfitCategory.outer).toList(),
-      accessories:
-          items.where((e) => e.category == OutfitCategory.accessory).toList(),
+      accessories: items
+          .where((e) => e.category == OutfitCategory.accessory)
+          .toList(),
     );
   }
 

@@ -9,8 +9,12 @@ import 'user/presentation/user_screen_root.dart';
 import 'weather/presentation/outfit_screen_root.dart';
 
 void main() async {
-  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
+
+  // .env 파일 로드
+  await dotenv.load(fileName: ".env");
+
+  // 온보딩 완료 여부 확인
   final prefs = await SharedPreferences.getInstance();
   final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
 
@@ -49,6 +53,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       routerConfig: router,
+      debugShowCheckedModeBanner: false,
     );
   }
 }

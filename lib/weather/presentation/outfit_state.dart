@@ -4,6 +4,8 @@ import '../domain/model/outfit_item.dart';
 
 part 'outfit_state.freezed.dart';
 
+enum WeatherLoadingStatus { initial, loading, success, error }
+
 @freezed
 class OutfitState with _$OutfitState {
   const factory OutfitState({
@@ -13,5 +15,8 @@ class OutfitState with _$OutfitState {
     @Default([]) List<OutfitItem> bottoms,
     @Default([]) List<OutfitItem> outers,
     @Default([]) List<OutfitItem> accessories,
+    DateTime? lastUpdated,
+    @Default(WeatherLoadingStatus.initial) WeatherLoadingStatus loadingStatus,
+    String? errorMessage,
   }) = _OutfitState;
 }
