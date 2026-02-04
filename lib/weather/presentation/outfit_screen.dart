@@ -68,12 +68,44 @@ class _OutfitScreenState extends State<OutfitScreen>
     });
   }
 
+  // 온도별 배경색 헬퍼
+  Color _getTemperatureBackground(double temp) {
+    if (temp >= 28) return const Color(0xFFFFF5E6);
+    if (temp >= 23) return const Color(0xFFFFF9F0);
+    if (temp >= 17) return const Color(0xFFE8F4FB);
+    if (temp >= 9) return const Color(0xFFEEF5FF);
+    if (temp >= 0) return const Color(0xFFE1F0FA);
+    return const Color(0xFFCEE3F4);
+  }
+
+  // 온도별 그라데이션 헬퍼
+  List<Color> _getTemperatureGradient(double temp) {
+    if (temp >= 23) {
+      return [const Color(0xFFFA9E42), const Color(0xFFF8E36F)];
+    }
+    return [const Color(0xFF0E8AE4), const Color(0xFF5BA8E4)];
+  }
+
+  // 온도별 액센트 컬러 헬퍼
+  Color _getTemperatureAccent(double temp) {
+    return _getTemperatureGradient(temp)[0];
+  }
+
+  // 카테고리별 그라데이션 헬퍼
+  List<Color> _getCategoryGradient(int index) {
+    const gradients = [
+      [Color(0xFF0E8AE4), Color(0xFF5BA8E4)],
+      [Color(0xFFF8E36F), Color(0xFFFFD93D)],
+      [Color(0xFFFA9E42), Color(0xFFFFB347)],
+      [Color(0xFF10B981), Color(0xFF6BCF7F)],
+    ];
+    return gradients[index % gradients.length];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.getTemperatureBackground(
-        widget.state.temperature,
-      ),
+      backgroundColor: _getTemperatureBackground(widget.state.temperature),
       body: widget.state.loadingStatus == WeatherLoadingStatus.loading
           ? _buildLoadingView()
           : widget.state.loadingStatus == WeatherLoadingStatus.error
@@ -83,10 +115,8 @@ class _OutfitScreenState extends State<OutfitScreen>
                 _refresh();
                 await Future.delayed(const Duration(milliseconds: 500));
               },
-              color: AppColors.textWhite,
-              backgroundColor: AppColors.getTemperatureAccent(
-                widget.state.temperature,
-              ),
+              color: Colors.white,
+              backgroundColor: _getTemperatureAccent(widget.state.temperature),
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
@@ -111,11 +141,11 @@ class _OutfitScreenState extends State<OutfitScreen>
 
   Widget _buildLoadingView() {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: AppColors.coolGradient,
+          colors: _getTemperatureGradient(10),
         ),
       ),
       child: SafeArea(
@@ -126,21 +156,24 @@ class _OutfitScreenState extends State<OutfitScreen>
               Container(
                 padding: const EdgeInsets.all(AppSpacing.large),
                 decoration: BoxDecoration(
-                  color: AppColors.textWhite,
-                  borderRadius: AppRadius.extraLargeRadius,
+                  color: Colors.white,
+                  borderRadius: AppRadius.xLargeRadius,
                   boxShadow: [AppShadows.large()],
                 ),
                 child: const Icon(
                   Icons.cloud_download_rounded,
                   size: 64,
-                  color: AppColors.primary,
+                  color: Color(0xFF0E8AE4),
                 ),
               ),
               const SizedBox(height: AppSpacing.xLarge),
-              Text(
+              const Text(
                 '날씨 정보를 불러오는 중...',
-                style: AppTextStyles.headlineSmall.copyWith(
-                  color: AppColors.textWhite,
+                style: TextStyle(
+                  fontFamily: 'GangwonEduPower',
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: AppSpacing.medium),
@@ -150,7 +183,7 @@ class _OutfitScreenState extends State<OutfitScreen>
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.textWhite.withOpacity(0.9),
+                    Colors.white.withOpacity(0.9),
                   ),
                 ),
               ),
@@ -167,9 +200,10 @@ class _OutfitScreenState extends State<OutfitScreen>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: AppColors.veryHotGradient
-              .map((c) => c.withOpacity(0.8))
-              .toList(),
+          colors: [
+            const Color(0xFFFF6B6B).withOpacity(0.8),
+            const Color(0xFFFFB347).withOpacity(0.8),
+          ],
         ),
       ),
       child: SafeArea(
@@ -182,29 +216,35 @@ class _OutfitScreenState extends State<OutfitScreen>
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.large),
                   decoration: BoxDecoration(
-                    color: AppColors.textWhite,
-                    borderRadius: AppRadius.extraLargeRadius,
+                    color: Colors.white,
+                    borderRadius: AppRadius.xLargeRadius,
                     boxShadow: [AppShadows.large()],
                   ),
                   child: const Icon(
                     Icons.cloud_off_rounded,
                     size: 64,
-                    color: AppColors.error,
+                    color: Color(0xFFEF4444),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xLarge),
-                Text(
+                const Text(
                   '날씨 정보를 불러올 수 없습니다',
-                  style: AppTextStyles.headlineSmall.copyWith(
-                    color: AppColors.textWhite,
+                  style: TextStyle(
+                    fontFamily: 'GangwonEduPower',
+                    fontSize: 20,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.small),
                 Text(
                   widget.state.errorMessage ?? '네트워크 연결을 확인해주세요',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textWhite.withOpacity(0.9),
+                  style: TextStyle(
+                    fontFamily: 'GangwonEduAll',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withOpacity(0.9),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -212,10 +252,17 @@ class _OutfitScreenState extends State<OutfitScreen>
                 ElevatedButton.icon(
                   onPressed: _refresh,
                   icon: const Icon(Icons.refresh_rounded, size: 24),
-                  label: Text('다시 시도하기', style: AppTextStyles.labelLarge),
+                  label: const Text(
+                    '다시 시도하기',
+                    style: TextStyle(
+                      fontFamily: 'GangwonEduAll',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.textWhite,
-                    foregroundColor: AppColors.error,
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFFEF4444),
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.xLarge,
                       vertical: AppSpacing.medium,
@@ -251,9 +298,7 @@ class _OutfitScreenState extends State<OutfitScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: AppColors.getTemperatureGradient(
-                widget.state.temperature,
-              ),
+              colors: _getTemperatureGradient(widget.state.temperature),
             ),
           ),
           child: SafeArea(
@@ -271,20 +316,23 @@ class _OutfitScreenState extends State<OutfitScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         '옷차림표',
-                        style: AppTextStyles.headlineLarge.copyWith(
-                          color: AppColors.textWhite,
+                        style: TextStyle(
+                          fontFamily: 'GangwonEduPower',
+                          fontSize: 32,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
                         ),
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          color: AppColors.textWhite.withOpacity(0.2),
+                          color: Colors.white.withOpacity(0.2),
                           borderRadius: AppRadius.mediumRadius,
                         ),
                         child: IconButton(
                           icon: const Icon(Icons.refresh_rounded),
-                          color: AppColors.textWhite,
+                          color: Colors.white,
                           iconSize: 24,
                           onPressed: _refresh,
                           tooltip: '새로고침',
@@ -318,11 +366,15 @@ class _OutfitScreenState extends State<OutfitScreen>
           ),
           padding: const EdgeInsets.all(AppSpacing.xLarge),
           decoration: BoxDecoration(
-            color: AppColors.textWhite,
+            color: Colors.white,
             borderRadius: AppRadius.xxLargeRadius,
             boxShadow: [
-              AppShadows.temperatureCard(
-                AppColors.getTemperatureAccent(widget.state.temperature),
+              BoxShadow(
+                color: _getTemperatureAccent(
+                  widget.state.temperature,
+                ).withOpacity(0.15),
+                blurRadius: 40,
+                offset: const Offset(0, 20),
               ),
             ],
           ),
@@ -343,7 +395,7 @@ class _OutfitScreenState extends State<OutfitScreen>
                           ),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: AppColors.getTemperatureGradient(
+                              colors: _getTemperatureGradient(
                                 widget.state.temperature,
                               ),
                             ),
@@ -355,7 +407,7 @@ class _OutfitScreenState extends State<OutfitScreen>
                               const Icon(
                                 Icons.access_time_rounded,
                                 size: 14,
-                                color: AppColors.textWhite,
+                                color: Colors.white,
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -366,8 +418,11 @@ class _OutfitScreenState extends State<OutfitScreen>
                                     : DateFormat(
                                         'M월d일 HH시mm분',
                                       ).format(DateTime.now()),
-                                style: AppTextStyles.labelMedium.copyWith(
-                                  color: AppColors.textWhite,
+                                style: const TextStyle(
+                                  fontFamily: 'GangwonEduAll',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
                                 ),
                               ),
                             ],
@@ -379,8 +434,13 @@ class _OutfitScreenState extends State<OutfitScreen>
                           children: [
                             Text(
                               widget.state.temperature.toStringAsFixed(0),
-                              style: AppTextStyles.displayLarge.copyWith(
-                                color: AppColors.getTemperatureAccent(
+                              style: TextStyle(
+                                fontFamily: 'GangwonEduPower',
+                                fontSize: 80,
+                                fontWeight: FontWeight.w400,
+                                height: 1.0,
+                                letterSpacing: -2,
+                                color: _getTemperatureAccent(
                                   widget.state.temperature,
                                 ),
                               ),
@@ -389,8 +449,13 @@ class _OutfitScreenState extends State<OutfitScreen>
                               padding: const EdgeInsets.only(top: 8),
                               child: Text(
                                 '°',
-                                style: AppTextStyles.displaySmall.copyWith(
-                                  color: AppColors.getTemperatureAccent(
+                                style: TextStyle(
+                                  fontFamily: 'GangwonEduPower',
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.1,
+                                  letterSpacing: -1,
+                                  color: _getTemperatureAccent(
                                     widget.state.temperature,
                                   ).withOpacity(0.7),
                                 ),
@@ -401,8 +466,11 @@ class _OutfitScreenState extends State<OutfitScreen>
                         const SizedBox(height: AppSpacing.small),
                         Text(
                           widget.state.weatherDescription,
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            color: AppColors.textSecondary,
+                          style: const TextStyle(
+                            fontFamily: 'GangwonEduAll',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF8E8E8E),
                           ),
                         ),
                       ],
@@ -421,23 +489,25 @@ class _OutfitScreenState extends State<OutfitScreen>
                             padding: const EdgeInsets.all(AppSpacing.large),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: AppColors.getTemperatureGradient(
+                                colors: _getTemperatureGradient(
                                   widget.state.temperature,
                                 ),
                               ),
-                              borderRadius: AppRadius.extraLargeRadius,
+                              borderRadius: AppRadius.xLargeRadius,
                               boxShadow: [
-                                AppShadows.gradientCard(
-                                  AppColors.getTemperatureAccent(
+                                BoxShadow(
+                                  color: _getTemperatureAccent(
                                     widget.state.temperature,
-                                  ),
+                                  ).withOpacity(0.2),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 8),
                                 ),
                               ],
                             ),
                             child: Icon(
                               _getWeatherIcon(widget.state.temperature),
                               size: 56,
-                              color: AppColors.textWhite,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -477,10 +547,13 @@ class _OutfitScreenState extends State<OutfitScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 '추천 옷차림',
-                style: AppTextStyles.headlineMedium.copyWith(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  fontFamily: 'GangwonEduPower',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF494A4B),
                 ),
               ),
               const SizedBox(height: AppSpacing.large),
@@ -520,7 +593,7 @@ class _OutfitScreenState extends State<OutfitScreen>
       margin: const EdgeInsets.only(bottom: AppSpacing.medium),
       padding: const EdgeInsets.all(AppSpacing.large),
       decoration: BoxDecoration(
-        color: AppColors.textWhite,
+        color: Colors.white,
         borderRadius: AppRadius.largeRadius,
         boxShadow: [AppShadows.medium()],
       ),
@@ -532,18 +605,19 @@ class _OutfitScreenState extends State<OutfitScreen>
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: AppColors.getCategoryGradient(index),
-                  ),
+                  gradient: LinearGradient(colors: _getCategoryGradient(index)),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(icon, size: 22, color: AppColors.textWhite),
+                child: Icon(icon, size: 22, color: Colors.white),
               ),
               const SizedBox(width: AppSpacing.small),
               Text(
                 title,
-                style: AppTextStyles.titleLarge.copyWith(
-                  color: AppColors.textPrimary,
+                style: const TextStyle(
+                  fontFamily: 'GangwonEduAll',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF494A4B),
                 ),
               ),
             ],
@@ -582,22 +656,23 @@ class _OutfitScreenState extends State<OutfitScreen>
       ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: AppColors.getCategoryGradient(
+          colors: _getCategoryGradient(
             categoryIndex,
           ).map((c) => c.withOpacity(0.1)).toList(),
         ),
         borderRadius: AppRadius.smallRadius,
         border: Border.all(
-          color: AppColors.getCategoryGradient(
-            categoryIndex,
-          )[0].withOpacity(0.3),
+          color: _getCategoryGradient(categoryIndex)[0].withOpacity(0.3),
           width: 1.5,
         ),
       ),
       child: Text(
         item.name,
-        style: AppTextStyles.bodyMedium.copyWith(
-          color: AppColors.getCategoryGradient(categoryIndex)[0],
+        style: TextStyle(
+          fontFamily: 'GangwonEduAll',
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: _getCategoryGradient(categoryIndex)[0],
         ),
       ),
     );
