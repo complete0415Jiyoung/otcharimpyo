@@ -6,8 +6,9 @@ part 'weather_dto.g.dart';
 class WeatherDto {
   final WeatherMainDto? main;
   final List<WeatherInfoDto>? weather;
+  final WeatherRainDto? rain;
 
-  WeatherDto({this.main, this.weather});
+  WeatherDto({this.main, this.weather, this.rain});
 
   factory WeatherDto.fromJson(Map<String, dynamic> json) =>
       _$WeatherDtoFromJson(json);
@@ -17,7 +18,12 @@ class WeatherDto {
 class WeatherMainDto {
   final double? temp;
 
-  WeatherMainDto({this.temp});
+  @JsonKey(name: 'feels_like')
+  final double? feelsLike;
+
+  final int? humidity;
+
+  WeatherMainDto({this.temp, this.feelsLike, this.humidity});
 
   factory WeatherMainDto.fromJson(Map<String, dynamic> json) =>
       _$WeatherMainDtoFromJson(json);
@@ -32,4 +38,15 @@ class WeatherInfoDto {
 
   factory WeatherInfoDto.fromJson(Map<String, dynamic> json) =>
       _$WeatherInfoDtoFromJson(json);
+}
+
+@JsonSerializable(createToJson: false)
+class WeatherRainDto {
+  @JsonKey(name: '1h')
+  final double? oneHour;
+
+  WeatherRainDto({this.oneHour});
+
+  factory WeatherRainDto.fromJson(Map<String, dynamic> json) =>
+      _$WeatherRainDtoFromJson(json);
 }

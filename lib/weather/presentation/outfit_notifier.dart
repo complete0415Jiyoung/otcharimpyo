@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/model/outfit_item.dart';
 import '../domain/usecase/get_current_weather_use_case.dart';
 import '../data/data_source/weather_data_source.dart';
 import '../data/repository_impl/weather_repository_impl.dart';
+import '../../location/domain/usecase/get_current_location_use_case.dart';
+import '../../location/data/data_source/location_data_source.dart';
+import '../../location/data/repository_impl/location_repository_impl.dart';
 import 'outfit_state.dart';
 import 'outfit_action.dart';
 
@@ -14,17 +16,24 @@ part 'outfit_notifier.g.dart';
 @riverpod
 class OutfitNotifier extends _$OutfitNotifier {
   late final GetCurrentWeatherUseCase _getWeatherUseCase;
+  late final GetCurrentLocationUseCase _getLocationUseCase;
 
   @override
   OutfitState build() {
-    // DI 구성
+    // 🔥 Weather DI
     final weatherDataSource = WeatherDataSource();
     final weatherRepository = WeatherRepositoryImpl(
       dataSource: weatherDataSource,
     );
     _getWeatherUseCase = GetCurrentWeatherUseCase(weatherRepository);
 
-    // 초기 로딩
+    // 🔥 Location DI
+    final locationDataSource = LocationDataSource();
+    final locationRepository = LocationRepositoryImpl(
+      dataSource: locationDataSource,
+    );
+    _getLocationUseCase = GetCurrentLocationUseCase(locationRepository);
+
     Future.microtask(() => _loadWeatherAndOutfit());
 
     return const OutfitState();
@@ -40,55 +49,70 @@ class OutfitNotifier extends _$OutfitNotifier {
   }
 
   Future<void> _loadWeatherAndOutfit() async {
-    // 로딩 상태로 변경
     state = state.copyWith(loadingStatus: WeatherLoadingStatus.loading);
 
     try {
-      // 위치 권한 확인
-      final permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        debugPrint('위치 권한이 없습니다');
+      // 🔥 1. 위치 정보 가져오기 (UseCase 사용!)
+      final locationResult = await _getLocationUseCase.execute().timeout(
+        const Duration(seconds: 15),
+        onTimeout: () => throw Exception('위치 정보를 가져오는데 시간이 초과되었습니다'),
+      );
+
+      if (!locationResult.hasValue) {
+        final error = locationResult.error;
         state = state.copyWith(
           loadingStatus: WeatherLoadingStatus.error,
-          errorMessage: '위치 권한이 필요합니다',
+          errorMessage: error?.toString() ?? '위치 정보를 불러올 수 없습니다',
         );
         return;
       }
 
-      // 현재 위치 가져오기
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.low,
-          timeLimit: Duration(seconds: 10),
-        ),
-      );
+      final location = locationResult.value!;
+      debugPrint('📍 위치: ${location.fullAddress}');
 
-      // 날씨 정보 가져오기
-      final weatherResult = await _getWeatherUseCase.execute(
-        position.latitude,
-        position.longitude,
-      );
+      // 🔥 2. 날씨 정보 가져오기
+      final weatherResult = await _getWeatherUseCase
+          .execute(location.latitude, location.longitude)
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () => throw Exception('날씨 정보를 가져오는데 시간이 초과되었습니다'),
+          );
 
-      if (weatherResult.hasValue) {
-        final weather = weatherResult.value!;
-        state = state.copyWith(
-          temperature: weather.temp,
-          weatherDescription: weather.description,
-          lastUpdated: DateTime.now(),
-          loadingStatus: WeatherLoadingStatus.success,
-          errorMessage: null,
-        );
-        state = _applyOutfit(state, weather.temp);
-      } else if (weatherResult.hasError) {
-        debugPrint('날씨 조회 실패: ${weatherResult.error}');
+      if (!weatherResult.hasValue) {
         state = state.copyWith(
           loadingStatus: WeatherLoadingStatus.error,
           errorMessage: '날씨 정보를 불러오는데 실패했습니다',
         );
+        return;
       }
+
+      final weather = weatherResult.value!;
+
+      // 🔥 3. State 업데이트
+      state = state.copyWith(
+        temperature: weather.temp,
+        weatherDescription: weather.description,
+        location: location.fullAddress, // 🔥 Location 모델에서!
+        feelsLike: weather.feelsLike,
+        humidity: weather.humidity,
+        precipitation: weather.precipitation,
+        weatherIcon: weather.icon,
+        lastUpdated: DateTime.now(),
+        loadingStatus: WeatherLoadingStatus.success,
+        errorMessage: null,
+      );
+
+      state = _applyOutfit(state, weather.temp);
+    } on Exception catch (e) {
+      final errorMsg = e.toString().contains('시간이 초과')
+          ? '요청 시간이 초과되었습니다\n네트워크 연결을 확인해주세요'
+          : '날씨 정보를 불러오는데 실패했습니다';
+
+      state = state.copyWith(
+        loadingStatus: WeatherLoadingStatus.error,
+        errorMessage: errorMsg,
+      );
     } catch (e) {
-      debugPrint('날씨 및 옷차림 로딩 실패: $e');
       state = state.copyWith(
         loadingStatus: WeatherLoadingStatus.error,
         errorMessage: '날씨 정보를 불러오는데 실패했습니다',

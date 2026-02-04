@@ -8,5 +8,9 @@ class Weather with _$Weather {
     required double temp,
     required String description,
     required String icon,
+
+    required double feelsLike, // 체감온도
+    required int humidity, // 습도 (%)
+    required double precipitation, // 강수량 (mm)
   }) = _Weather;
 }

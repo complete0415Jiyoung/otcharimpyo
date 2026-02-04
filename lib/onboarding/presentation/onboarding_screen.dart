@@ -173,42 +173,37 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8F4FB),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 페이지 인디케이터 (상단)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.large,
-                vertical: AppSpacing.medium,
+      body: Stack(
+        children: [
+          // 페이지 뷰 (전체 화면)
+          PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() => _currentPage = index);
+            },
+            children: [
+              OnboardingPageOne(onNext: _goToNextPage),
+              OnboardingPageTwo(
+                onRequestPermission: _requestLocationPermission,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildPageIndicator(0),
-                  const SizedBox(width: AppSpacing.xSmall),
-                  _buildPageIndicator(1),
-                ],
-              ),
-            ),
+            ],
+          ),
 
-            // 페이지 뷰
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() => _currentPage = index);
-                },
-                children: [
-                  OnboardingPageOne(onNext: _goToNextPage),
-                  OnboardingPageTwo(
-                    onRequestPermission: _requestLocationPermission,
-                  ),
-                ],
-              ),
+          // 페이지 인디케이터 (상단 중앙, 배경 위에)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + AppSpacing.medium,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildPageIndicator(0),
+                const SizedBox(width: AppSpacing.xSmall),
+                _buildPageIndicator(1),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

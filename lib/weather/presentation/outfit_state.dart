@@ -18,5 +18,11 @@ class OutfitState with _$OutfitState {
     DateTime? lastUpdated,
     @Default(WeatherLoadingStatus.initial) WeatherLoadingStatus loadingStatus,
     String? errorMessage,
+
+    @Default('서울특별시 은평구') String location, // 위치
+    @Default(0.0) double feelsLike, // 체감온도
+    @Default(0) int humidity, // 습도
+    @Default(0.0) double precipitation, // 강수량
+    String? weatherIcon, // 날씨 아이콘
   }) = _OutfitState;
 }

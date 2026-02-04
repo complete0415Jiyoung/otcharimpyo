@@ -7,6 +7,10 @@ extension WeatherDtoMapper on WeatherDto {
       temp: main?.temp ?? 0.0,
       description: weather?.firstOrNull?.description ?? '',
       icon: weather?.firstOrNull?.icon ?? '',
+
+      feelsLike: main?.feelsLike ?? main?.temp ?? 0.0,
+      humidity: main?.humidity ?? 0,
+      precipitation: rain?.oneHour ?? 0.0,
     );
   }
 }
