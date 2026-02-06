@@ -1,118 +1,32 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../core/di/di_setup.dart';
 import '../domain/model/outfit_item.dart';
-import '../domain/usecase/get_current_weather_use_case.dart';
-import '../../location/domain/usecase/get_current_location_use_case.dart';
-import 'outfit_state.dart';
-import 'outfit_action.dart';
+import 'temperature_search_state.dart';
 
-part 'outfit_notifier.g.dart';
+part 'temperature_search_notifier.g.dart';
 
 @riverpod
-class OutfitNotifier extends _$OutfitNotifier {
-  // ✅ GetIt으로부터 주입받을 UseCase들
-  late final GetCurrentWeatherUseCase _getWeatherUseCase;
-  late final GetCurrentLocationUseCase _getLocationUseCase;
-
-  OutfitNotifier({
-    GetCurrentWeatherUseCase? getWeatherUseCase,
-    GetCurrentLocationUseCase? getLocationUseCase,
-  }) : _getWeatherUseCase =
-           getWeatherUseCase ?? getIt<GetCurrentWeatherUseCase>(),
-       _getLocationUseCase =
-           getLocationUseCase ?? getIt<GetCurrentLocationUseCase>();
-
+class TemperatureSearchNotifier extends _$TemperatureSearchNotifier {
   @override
-  OutfitState build() {
-    Future.microtask(() => _loadWeatherAndOutfit());
-    return const OutfitState();
+  TemperatureSearchState build() {
+    // 초기 온도 12도로 설정하고 옷차림 적용
+    final initialState = const TemperatureSearchState(
+      selectedTemperature: 12.0,
+    );
+    return _applyOutfit(initialState, 12.0);
   }
 
-  Future<void> onAction(OutfitAction action) async {
-    switch (action) {
-      case OnChangeTemperature(:final temperature):
-        state = _applyOutfit(state, temperature);
-      case OnRefreshOutfit():
-        await _loadWeatherAndOutfit();
-    }
+  void onTemperatureChanged(double temperature) {
+    state = state.copyWith(selectedTemperature: temperature);
+    state = _applyOutfit(state, temperature);
   }
 
-  Future<void> _loadWeatherAndOutfit() async {
-    state = state.copyWith(loadingStatus: WeatherLoadingStatus.loading);
-
-    try {
-      // 🔥 1. 위치 정보 가져오기 (UseCase 사용!)
-      final locationResult = await _getLocationUseCase.execute().timeout(
-        const Duration(seconds: 15),
-        onTimeout: () => throw Exception('위치 정보를 가져오는데 시간이 초과되었습니다'),
-      );
-
-      if (!locationResult.hasValue) {
-        final error = locationResult.error;
-        state = state.copyWith(
-          loadingStatus: WeatherLoadingStatus.error,
-          errorMessage: error?.toString() ?? '위치 정보를 불러올 수 없습니다',
-        );
-        return;
-      }
-
-      final location = locationResult.value!;
-
-      // 🔥 2. 날씨 정보 가져오기
-      final weatherResult = await _getWeatherUseCase
-          .execute(location.latitude, location.longitude)
-          .timeout(
-            const Duration(seconds: 15),
-            onTimeout: () => throw Exception('날씨 정보를 가져오는데 시간이 초과되었습니다'),
-          );
-
-      if (!weatherResult.hasValue) {
-        state = state.copyWith(
-          loadingStatus: WeatherLoadingStatus.error,
-          errorMessage: '날씨 정보를 불러오는데 실패했습니다',
-        );
-        return;
-      }
-
-      final weather = weatherResult.value!;
-
-      // 🔥 3. State 업데이트
-      state = state.copyWith(
-        temperature: weather.temp,
-        weatherDescription: weather.description,
-        location: location.fullAddress,
-        feelsLike: weather.feelsLike,
-        humidity: weather.humidity,
-        precipitation: weather.precipitation,
-        weatherIcon: weather.icon,
-        lastUpdated: DateTime.now(),
-        loadingStatus: WeatherLoadingStatus.success,
-        errorMessage: null,
-      );
-
-      state = _applyOutfit(state, weather.temp);
-    } on Exception catch (e) {
-      final errorMsg = e.toString().contains('시간이 초과')
-          ? '요청 시간이 초과되었습니다\n네트워크 연결을 확인해주세요'
-          : '날씨 정보를 불러오는데 실패했습니다';
-
-      state = state.copyWith(
-        loadingStatus: WeatherLoadingStatus.error,
-        errorMessage: errorMsg,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        loadingStatus: WeatherLoadingStatus.error,
-        errorMessage: '날씨 정보를 불러오는데 실패했습니다',
-      );
-    }
-  }
-
-  OutfitState _applyOutfit(OutfitState current, double temp) {
+  TemperatureSearchState _applyOutfit(
+    TemperatureSearchState current,
+    double temp,
+  ) {
     final items = _getOutfitForTemperature(temp);
     return current.copyWith(
-      temperature: temp,
       tops: items.where((e) => e.category == OutfitCategory.top).toList(),
       bottoms: items.where((e) => e.category == OutfitCategory.bottom).toList(),
       outers: items.where((e) => e.category == OutfitCategory.outer).toList(),

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../onboarding/presentation/onboarding_screen.dart';
 import '../../weather/presentation/outfit_screen_root.dart';
+import '../../weather/presentation/temperature_search_screen.dart';
 
 import 'routes.dart';
 
@@ -50,6 +51,17 @@ class AppRouter {
             context: context,
             state: state,
             child: const OutfitScreenRoot(),
+          ),
+        ),
+
+        // 온도 검색 화면
+        GoRoute(
+          path: Routes.temperatureSearch,
+          name: Routes.temperatureSearchName,
+          pageBuilder: (context, state) => _buildPageWithDefaultTransition(
+            context: context,
+            state: state,
+            child: const TemperatureSearchScreen(),
           ),
         ),
       ],

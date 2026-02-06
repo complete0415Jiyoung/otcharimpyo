@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_styles.dart';
 import 'outfit_state.dart';
@@ -207,8 +208,8 @@ class _OutfitScreenState extends State<OutfitScreen> {
             children: [
               const SizedBox(height: AppSpacing.small),
 
-              // 상단 인사말
-              _buildGreeting(),
+              // 상단 인사말 + 온도 검색 버튼
+              _buildHeader(),
 
               const SizedBox(height: AppSpacing.xLarge),
 
@@ -233,28 +234,55 @@ class _OutfitScreenState extends State<OutfitScreen> {
     );
   }
 
-  // 인사말
-  Widget _buildGreeting() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  // 헤더 (인사말 + 온도 검색 버튼)
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          _getGreeting(),
-          style: const TextStyle(
-            fontFamily: 'GangwonEduPower',
-            fontSize: 20,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF494A4B),
-          ),
+        // 인사말
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _getGreeting(),
+              style: const TextStyle(
+                fontFamily: 'GangwonEduPower',
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF494A4B),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _getCurrentDate(),
+              style: const TextStyle(
+                fontFamily: 'GangwonEduAll',
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF8E8E8E),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          _getCurrentDate(),
-          style: const TextStyle(
-            fontFamily: 'GangwonEduAll',
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF8E8E8E),
+
+        // 온도 검색 버튼
+        Material(
+          color: Colors.white,
+          borderRadius: AppRadius.circle,
+          elevation: 2,
+          child: InkWell(
+            onTap: () {
+              context.push('/temperature-search');
+            },
+            borderRadius: AppRadius.circle,
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.small),
+              child: const Icon(
+                Icons.search_rounded,
+                color: Color(0xFF0E8AE4),
+                size: 24,
+              ),
+            ),
           ),
         ),
       ],
