@@ -1,11 +1,8 @@
-// lib/core/routing/router.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../onboarding/presentation/onboarding_screen.dart';
 import '../../weather/presentation/outfit_screen_root.dart';
-import '../../user/presentation/user_screen_root.dart';
 
 import 'routes.dart';
 
@@ -54,19 +51,6 @@ class AppRouter {
             state: state,
             child: const OutfitScreenRoot(),
           ),
-        ),
-
-        // 사용자 목록 화면
-        GoRoute(
-          path: Routes.users,
-          name: Routes.usersName,
-          pageBuilder: (context, state) => _buildPageWithDefaultTransition(
-            context: context,
-            state: state,
-            child: const UserScreenRoot(),
-          ),
-
-          // 하위 라우트 (사용자 상세)
         ),
       ],
 

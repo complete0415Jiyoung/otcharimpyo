@@ -18,7 +18,7 @@ void main() async {
   // ✅ DI 초기화 (GetIt)
   // useMockData: true -> Mock 데이터 사용
   // useMockData: false -> 실제 API 사용
-  diSetup(useMockData: false);
+  diSetup();
 
   // 온보딩 완료 여부 확인
   final prefs = await SharedPreferences.getInstance();

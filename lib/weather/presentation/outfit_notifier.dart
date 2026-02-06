@@ -59,7 +59,6 @@ class OutfitNotifier extends _$OutfitNotifier {
       }
 
       final location = locationResult.value!;
-      debugPrint('📍 위치: ${location.fullAddress}');
 
       // 🔥 2. 날씨 정보 가져오기
       final weatherResult = await _getWeatherUseCase

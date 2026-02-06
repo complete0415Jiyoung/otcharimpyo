@@ -1,5 +1,3 @@
-// lib/weather/presentation/outfit_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -286,7 +284,7 @@ class _OutfitScreenState extends State<OutfitScreen> {
               ),
               const SizedBox(width: 4),
               Text(
-                widget.state.location, // ✅ state 사용 (하드코딩 제거)
+                widget.state.location,
                 style: const TextStyle(
                   fontFamily: 'GangwonEduAll',
                   fontSize: 16,
@@ -365,8 +363,8 @@ class _OutfitScreenState extends State<OutfitScreen> {
           child: _buildDetailItem(
             icon: Icons.thermostat_auto_rounded,
             label: '체감온도',
-            value: widget.state.feelsLike.toStringAsFixed(0), // ✅ state 사용
-            unit: '°C', // ✅ 단위 수정
+            value: widget.state.feelsLike.toStringAsFixed(0),
+            unit: '°C',
           ),
         ),
         const SizedBox(width: AppSpacing.small),
@@ -374,7 +372,7 @@ class _OutfitScreenState extends State<OutfitScreen> {
           child: _buildDetailItem(
             icon: Icons.water_drop_rounded,
             label: '습도',
-            value: widget.state.humidity.toString(), // ✅ state 사용
+            value: widget.state.humidity.toString(),
             unit: '%',
           ),
         ),
@@ -382,8 +380,8 @@ class _OutfitScreenState extends State<OutfitScreen> {
         Expanded(
           child: _buildDetailItem(
             icon: Icons.umbrella_rounded,
-            label: '강수량', // ✅ 라벨 수정
-            value: widget.state.precipitation.toStringAsFixed(1), // ✅ state 사용
+            label: '강수량',
+            value: widget.state.precipitation.toStringAsFixed(1),
             unit: 'mm',
           ),
         ),
