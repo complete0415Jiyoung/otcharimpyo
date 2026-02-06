@@ -1,8 +1,9 @@
+// lib/weather/presentation/outfit_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/theme/app_styles.dart';
-import '../domain/model/outfit_item.dart';
 import 'outfit_state.dart';
 import 'outfit_action.dart';
 
@@ -24,17 +25,9 @@ class _OutfitScreenState extends State<OutfitScreen> {
   // 시간대별 인사말
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    if (hour >= 5 && hour < 11) {
-      return '오늘도 상쾌한 시작이에요 ☀️';
-    } else if (hour >= 11 && hour < 14) {
-      return '점심은 잘 챙기셨나요? 🍱';
-    } else if (hour >= 14 && hour < 18) {
-      return '조금만 더 힘내요 💪';
-    } else if (hour >= 18 && hour < 22) {
-      return '오늘 하루도 수고 많았어요 🌆';
-    } else {
-      return '무리하지 마세요 🌙';
-    }
+    if (hour < 12) return '좋은 아침입니다!';
+    if (hour < 18) return '좋은 오후입니다!';
+    return '좋은 저녁입니다!';
   }
 
   // 현재 날짜

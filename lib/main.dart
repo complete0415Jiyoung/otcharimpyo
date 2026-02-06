@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+// DI Setup
+import 'core/di/di_setup.dart';
+
 import 'onboarding/presentation/onboarding_screen.dart';
 import 'user/presentation/user_screen_root.dart';
 import 'weather/presentation/outfit_screen_root.dart';
@@ -14,7 +17,9 @@ void main() async {
   // .env 파일 로드
   await dotenv.load(fileName: ".env");
 
-  // 온보딩 완료 여부 확인
+  // ✅ DI 초기화 (GetIt)
+  diSetup(useMockData: false);
+
   final prefs = await SharedPreferences.getInstance();
   final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
 

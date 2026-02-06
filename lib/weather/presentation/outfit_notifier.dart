@@ -1,13 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../core/di/di_setup.dart';
 import '../domain/model/outfit_item.dart';
 import '../domain/usecase/get_current_weather_use_case.dart';
-import '../data/data_source/weather_data_source.dart';
-import '../data/repository_impl/weather_repository_impl.dart';
 import '../../location/domain/usecase/get_current_location_use_case.dart';
-import '../../location/data/data_source/location_data_source.dart';
-import '../../location/data/repository_impl/location_repository_impl.dart';
 import 'outfit_state.dart';
 import 'outfit_action.dart';
 
@@ -15,27 +12,21 @@ part 'outfit_notifier.g.dart';
 
 @riverpod
 class OutfitNotifier extends _$OutfitNotifier {
+  // ✅ GetIt으로부터 주입받을 UseCase들
   late final GetCurrentWeatherUseCase _getWeatherUseCase;
   late final GetCurrentLocationUseCase _getLocationUseCase;
 
+  OutfitNotifier({
+    GetCurrentWeatherUseCase? getWeatherUseCase,
+    GetCurrentLocationUseCase? getLocationUseCase,
+  }) : _getWeatherUseCase =
+           getWeatherUseCase ?? getIt<GetCurrentWeatherUseCase>(),
+       _getLocationUseCase =
+           getLocationUseCase ?? getIt<GetCurrentLocationUseCase>();
+
   @override
   OutfitState build() {
-    // 🔥 Weather DI
-    final weatherDataSource = WeatherDataSource();
-    final weatherRepository = WeatherRepositoryImpl(
-      dataSource: weatherDataSource,
-    );
-    _getWeatherUseCase = GetCurrentWeatherUseCase(weatherRepository);
-
-    // 🔥 Location DI
-    final locationDataSource = LocationDataSource();
-    final locationRepository = LocationRepositoryImpl(
-      dataSource: locationDataSource,
-    );
-    _getLocationUseCase = GetCurrentLocationUseCase(locationRepository);
-
     Future.microtask(() => _loadWeatherAndOutfit());
-
     return const OutfitState();
   }
 
@@ -92,7 +83,7 @@ class OutfitNotifier extends _$OutfitNotifier {
       state = state.copyWith(
         temperature: weather.temp,
         weatherDescription: weather.description,
-        location: location.fullAddress, // 🔥 Location 모델에서!
+        location: location.fullAddress,
         feelsLike: weather.feelsLike,
         humidity: weather.humidity,
         precipitation: weather.precipitation,
