@@ -24,9 +24,17 @@ class _OutfitScreenState extends State<OutfitScreen> {
   // 시간대별 인사말
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return '좋은 아침입니다!';
-    if (hour < 18) return '좋은 오후입니다!';
-    return '좋은 저녁입니다!';
+    if (hour >= 5 && hour < 11) {
+      return '오늘도 상쾌한 시작이에요 ☀️';
+    } else if (hour >= 11 && hour < 14) {
+      return '점심은 잘 챙기셨나요? 🍱';
+    } else if (hour >= 14 && hour < 18) {
+      return '조금만 더 힘내요 💪';
+    } else if (hour >= 18 && hour < 22) {
+      return '오늘 하루도 수고 많았어요 🌆';
+    } else {
+      return '무리하지 마세요 🌙';
+    }
   }
 
   // 현재 날짜
@@ -284,9 +292,9 @@ class _OutfitScreenState extends State<OutfitScreen> {
                 color: Color(0xFF0E8AE4),
               ),
               const SizedBox(width: 4),
-              const Text(
-                '서울특별시 은평구', // 하드코딩
-                style: TextStyle(
+              Text(
+                widget.state.location, // ✅ state 사용 (하드코딩 제거)
+                style: const TextStyle(
                   fontFamily: 'GangwonEduAll',
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -364,8 +372,8 @@ class _OutfitScreenState extends State<OutfitScreen> {
           child: _buildDetailItem(
             icon: Icons.thermostat_auto_rounded,
             label: '체감온도',
-            value: '7',
-            unit: 'High',
+            value: widget.state.feelsLike.toStringAsFixed(0), // ✅ state 사용
+            unit: '°C', // ✅ 단위 수정
           ),
         ),
         const SizedBox(width: AppSpacing.small),
@@ -373,7 +381,7 @@ class _OutfitScreenState extends State<OutfitScreen> {
           child: _buildDetailItem(
             icon: Icons.water_drop_rounded,
             label: '습도',
-            value: '61',
+            value: widget.state.humidity.toString(), // ✅ state 사용
             unit: '%',
           ),
         ),
@@ -381,8 +389,8 @@ class _OutfitScreenState extends State<OutfitScreen> {
         Expanded(
           child: _buildDetailItem(
             icon: Icons.umbrella_rounded,
-            label: '강수확률',
-            value: '4',
+            label: '강수량', // ✅ 라벨 수정
+            value: widget.state.precipitation.toStringAsFixed(1), // ✅ state 사용
             unit: 'mm',
           ),
         ),
@@ -473,16 +481,38 @@ class _OutfitScreenState extends State<OutfitScreen> {
           ),
           const SizedBox(height: AppSpacing.large),
 
-          // 상의
-          _buildOutfitRow('상의', ['히트텍', '니트']),
-          const SizedBox(height: AppSpacing.medium),
+          // ✅ state의 tops, bottoms, outers 사용
+          if (widget.state.tops.isNotEmpty) ...[
+            _buildOutfitRow(
+              '상의',
+              widget.state.tops.map((e) => e.name).toList(),
+            ),
+            const SizedBox(height: AppSpacing.medium),
+          ],
 
-          // 하의
-          _buildOutfitRow('하의', ['청바지', '레깅스']),
-          const SizedBox(height: AppSpacing.medium),
+          if (widget.state.bottoms.isNotEmpty) ...[
+            _buildOutfitRow(
+              '하의',
+              widget.state.bottoms.map((e) => e.name).toList(),
+            ),
+            const SizedBox(height: AppSpacing.medium),
+          ],
 
-          // 아우터
-          _buildOutfitRow('아우터', ['코트']),
+          if (widget.state.outers.isNotEmpty) ...[
+            _buildOutfitRow(
+              '아우터',
+              widget.state.outers.map((e) => e.name).toList(),
+            ),
+          ],
+
+          // 액세서리도 추가
+          if (widget.state.accessories.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.medium),
+            _buildOutfitRow(
+              '액세서리',
+              widget.state.accessories.map((e) => e.name).toList(),
+            ),
+          ],
         ],
       ),
     );
