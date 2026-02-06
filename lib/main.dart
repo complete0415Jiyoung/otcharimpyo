@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // DI Setup
 import 'core/di/di_setup.dart';
 
-import 'onboarding/presentation/onboarding_screen.dart';
-import 'user/presentation/user_screen_root.dart';
-import 'weather/presentation/outfit_screen_root.dart';
+// Router Setup
+import 'core/routing/router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +16,11 @@ void main() async {
   await dotenv.load(fileName: ".env");
 
   // ✅ DI 초기화 (GetIt)
+  // useMockData: true -> Mock 데이터 사용
+  // useMockData: false -> 실제 API 사용
   diSetup(useMockData: false);
 
+  // 온보딩 완료 여부 확인
   final prefs = await SharedPreferences.getInstance();
   final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
 
@@ -33,22 +34,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final router = GoRouter(
-      initialLocation: onboardingComplete ? '/outfit' : '/onboarding',
-      routes: [
-        GoRoute(
-          path: '/onboarding',
-          builder: (context, state) => const OnboardingScreen(),
-        ),
-        GoRoute(
-          path: '/outfit',
-          builder: (context, state) => const OutfitScreenRoot(),
-        ),
-        GoRoute(
-          path: '/users',
-          builder: (context, state) => const UserScreenRoot(),
-        ),
-      ],
+    final router = AppRouter.createRouter(
+      onboardingComplete: onboardingComplete,
     );
 
     return MaterialApp.router(

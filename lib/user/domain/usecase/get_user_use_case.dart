@@ -2,7 +2,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../model/user.dart';
 import '../repository/user_repository.dart';
 import '../../../core/error/result.dart';
-import '../../../core/error/failure.dart'; // ← 이 줄 있는지 확인!
 
 class GetUserUseCase {
   final UserRepository _repository;
