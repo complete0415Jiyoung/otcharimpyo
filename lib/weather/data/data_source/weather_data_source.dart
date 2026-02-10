@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'weather_data_source_interface.dart';
+
 const _baseUrl = 'https://api.openweathermap.org/data/2.5';
 
-class WeatherDataSource {
+class WeatherDataSource implements WeatherDataSourceInterface {
   String get _apiKey => dotenv.env['WEATHER_API_KEY'] ?? '';
 
+  @override
   Future<Map<String, dynamic>> fetchCurrentWeather(
     double lat,
     double lon,

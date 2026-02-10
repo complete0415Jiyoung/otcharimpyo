@@ -4,12 +4,12 @@ import '../../domain/model/location.dart';
 import '../../domain/repository/location_repository.dart';
 import '../../../core/error/result.dart';
 import '../../../core/utils/exception_mapper.dart';
-import '../data_source/location_data_source.dart';
+import '../data_source/location_data_source_interface.dart';
 
 class LocationRepositoryImpl implements LocationRepository {
-  final LocationDataSource _dataSource;
+  final LocationDataSourceInterface _dataSource;
 
-  LocationRepositoryImpl({required LocationDataSource dataSource})
+  LocationRepositoryImpl({required LocationDataSourceInterface dataSource})
       : _dataSource = dataSource;
 
   @override

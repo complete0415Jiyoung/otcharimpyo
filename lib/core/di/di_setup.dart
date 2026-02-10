@@ -1,6 +1,10 @@
 import 'package:get_it/get_it.dart';
 
-// Data Sources
+// Data Source Interfaces
+import '../../weather/data/data_source/weather_data_source_interface.dart';
+import '../../location/data/data_source/location_data_source_interface.dart';
+
+// Data Sources (Concrete implementations)
 import '../../weather/data/data_source/weather_data_source.dart';
 import '../../location/data/data_source/location_data_source.dart';
 
@@ -22,14 +26,14 @@ final getIt = GetIt.instance;
 /// DI 초기화 함수
 void diSetup() {
   // ========================================
-  // 1. Data Sources 등록
+  // 1. Data Sources 등록 (인터페이스로 등록)
   // ========================================
 
   // Weather DataSource
-  getIt.registerSingleton<WeatherDataSource>(WeatherDataSource());
+  getIt.registerSingleton<WeatherDataSourceInterface>(WeatherDataSource());
 
   // Location DataSource
-  getIt.registerSingleton<LocationDataSource>(LocationDataSource());
+  getIt.registerSingleton<LocationDataSourceInterface>(LocationDataSource());
 
   // ========================================
   // 2. Repositories 등록
@@ -37,12 +41,12 @@ void diSetup() {
 
   // Weather Repository
   getIt.registerSingleton<WeatherRepository>(
-    WeatherRepositoryImpl(dataSource: getIt<WeatherDataSource>()),
+    WeatherRepositoryImpl(dataSource: getIt<WeatherDataSourceInterface>()),
   );
 
   // Location Repository
   getIt.registerSingleton<LocationRepository>(
-    LocationRepositoryImpl(dataSource: getIt<LocationDataSource>()),
+    LocationRepositoryImpl(dataSource: getIt<LocationDataSourceInterface>()),
   );
 
   // ========================================
