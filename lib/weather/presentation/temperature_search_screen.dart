@@ -245,37 +245,37 @@ class TemperatureSearchScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTemperatureButton(
-    int temperature,
-    double currentTemp,
-    Function(double) onTemperatureChanged,
-  ) {
-    final isSelected = (currentTemp - temperature).abs() < 1;
+  // Widget _buildTemperatureButton(
+  //   int temperature,
+  //   double currentTemp,
+  //   Function(double) onTemperatureChanged,
+  // ) {
+  //   final isSelected = (currentTemp - temperature).abs() < 1;
 
-    return Material(
-      color: isSelected ? AppColors.primary : AppColors.backgroundSecondary,
-      borderRadius: AppRadius.mediumRadius,
-      child: InkWell(
-        onTap: () => onTemperatureChanged(temperature.toDouble()),
-        borderRadius: AppRadius.mediumRadius,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.medium,
-            vertical: AppSpacing.small,
-          ),
-          child: Text(
-            '$temperature°C',
-            style: TextStyle(
-              fontFamily: 'GangwonEduAll',
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: isSelected ? Colors.white : AppColors.darkGray,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  //   return Material(
+  //     color: isSelected ? AppColors.primary : AppColors.backgroundSecondary,
+  //     borderRadius: AppRadius.mediumRadius,
+  //     child: InkWell(
+  //       onTap: () => onTemperatureChanged(temperature.toDouble()),
+  //       borderRadius: AppRadius.mediumRadius,
+  //       child: Container(
+  //         padding: const EdgeInsets.symmetric(
+  //           horizontal: AppSpacing.medium,
+  //           vertical: AppSpacing.small,
+  //         ),
+  //         child: Text(
+  //           '$temperature°C',
+  //           style: TextStyle(
+  //             fontFamily: 'GangwonEduAll',
+  //             fontSize: 14,
+  //             fontWeight: FontWeight.w700,
+  //             color: isSelected ? Colors.white : AppColors.darkGray,
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // 추천 옷차림
   Widget _buildOutfitRecommendation(double displayTemp, state) {
