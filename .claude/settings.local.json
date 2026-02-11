@@ -4,7 +4,9 @@
       "Bash(tree:*)",
       "Bash(dart run build_runner:*)",
       "Bash(flutter analyze:*)",
-      "Bash(flutter pub get:*)"
+      "Bash(flutter pub get:*)",
+      "Bash(flutter test:*)",
+      "Bash(lcov:*)"
     ]
   }
 }
