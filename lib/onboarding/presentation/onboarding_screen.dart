@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../core/routing/routes.dart';
 import '../../core/theme/app_styles.dart';
 import '../data/onboarding_repository.dart';
 import 'widgets/onboarding_page_one.dart';
@@ -65,7 +66,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     // 권한 허용됨 → 온보딩 완료
     await ref.read(onboardingRepositoryProvider.notifier).completeOnboarding();
     if (mounted) {
-      context.go('/outfit');
+      context.go(Routes.home);
     }
   }
 
