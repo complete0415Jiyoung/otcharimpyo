@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_styles.dart';
 import 'outfit_state.dart';
@@ -17,8 +18,76 @@ class OutfitScreen extends StatefulWidget {
 }
 
 class _OutfitScreenState extends State<OutfitScreen> {
+  static const String _privacyPolicyUrl = 'https://www.notion.so/3047eab3764980659c98ddc8d0dad264';
+
   void _refresh() {
     widget.onAction(const OutfitAction.onRefresh());
+  }
+
+  void _showInfoBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(AppSpacing.xLarge),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xLarge),
+            const Text(
+              '앱 정보',
+              style: TextStyle(
+                fontFamily: 'GangwonEduPower',
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF494A4B),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.large),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined, color: Color(0xFF0E8AE4)),
+              title: const Text(
+                '개인정보처리방침',
+                style: TextStyle(
+                  fontFamily: 'GangwonEduAll',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () async {
+                Navigator.pop(context);
+                final uri = Uri.parse(_privacyPolicyUrl);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
+            ),
+            const SizedBox(height: AppSpacing.medium),
+            const Text(
+              '옷차림표 v1.0.0',
+              style: TextStyle(
+                fontFamily: 'GangwonEduAll',
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF8E8E8E),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.large),
+          ],
+        ),
+      ),
+    );
   }
 
   // 시간대별 인사말
@@ -265,25 +334,49 @@ class _OutfitScreenState extends State<OutfitScreen> {
           ],
         ),
 
-        // 온도 검색 버튼
-        Material(
-          color: Colors.white,
-          borderRadius: AppRadius.circle,
-          elevation: 2,
-          child: InkWell(
-            onTap: () {
-              context.push('/temperature-search');
-            },
-            borderRadius: AppRadius.circle,
-            child: Container(
-              padding: const EdgeInsets.all(AppSpacing.small),
-              child: const Icon(
-                Icons.search_rounded,
-                color: Color(0xFF0E8AE4),
-                size: 24,
+        // 버튼들
+        Row(
+          children: [
+            // 온도 검색 버튼
+            Material(
+              color: Colors.white,
+              borderRadius: AppRadius.circle,
+              elevation: 2,
+              child: InkWell(
+                onTap: () {
+                  context.push('/temperature-search');
+                },
+                borderRadius: AppRadius.circle,
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.small),
+                  child: const Icon(
+                    Icons.search_rounded,
+                    color: Color(0xFF0E8AE4),
+                    size: 24,
+                  ),
+                ),
               ),
             ),
-          ),
+            const SizedBox(width: AppSpacing.small),
+            // 정보 버튼
+            Material(
+              color: Colors.white,
+              borderRadius: AppRadius.circle,
+              elevation: 2,
+              child: InkWell(
+                onTap: _showInfoBottomSheet,
+                borderRadius: AppRadius.circle,
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.small),
+                  child: const Icon(
+                    Icons.info_outline_rounded,
+                    color: Color(0xFF8E8E8E),
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
