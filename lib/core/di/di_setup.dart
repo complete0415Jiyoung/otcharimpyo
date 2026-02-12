@@ -7,6 +7,7 @@ import '../../location/data/data_source/location_data_source_interface.dart';
 // Data Sources (Concrete implementations)
 import '../../weather/data/data_source/weather_data_source.dart';
 import '../../location/data/data_source/location_data_source.dart';
+import '../../location/data/data_source/mock_location_data_source.dart';
 
 // Repositories
 import '../../weather/domain/repository/weather_repository.dart';
@@ -24,7 +25,8 @@ import '../../weather/presentation/outfit_notifier.dart';
 final getIt = GetIt.instance;
 
 /// DI 초기화 함수
-void diSetup() {
+/// [useMockLocation] true이면 서울 위치를 반환하는 Mock 사용
+void diSetup({bool useMockLocation = false}) {
   // ========================================
   // 1. Data Sources 등록 (인터페이스로 등록)
   // ========================================
@@ -32,8 +34,10 @@ void diSetup() {
   // Weather DataSource
   getIt.registerSingleton<WeatherDataSourceInterface>(WeatherDataSource());
 
-  // Location DataSource
-  getIt.registerSingleton<LocationDataSourceInterface>(LocationDataSource());
+  // Location DataSource (Mock 또는 실제)
+  getIt.registerSingleton<LocationDataSourceInterface>(
+    useMockLocation ? MockLocationDataSource() : LocationDataSource(),
+  );
 
   // ========================================
   // 2. Repositories 등록

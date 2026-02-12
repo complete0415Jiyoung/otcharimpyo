@@ -16,9 +16,9 @@ void main() async {
   await dotenv.load(fileName: ".env");
 
   // ✅ DI 초기화 (GetIt)
-  // useMockData: true -> Mock 데이터 사용
-  // useMockData: false -> 실제 API 사용
-  diSetup();
+  // useMockLocation: true -> 서울 위치 Mock 사용
+  // useMockLocation: false -> 실제 GPS 사용
+  diSetup(useMockLocation: false);
 
   // 온보딩 완료 여부 확인
   final prefs = await SharedPreferences.getInstance();
