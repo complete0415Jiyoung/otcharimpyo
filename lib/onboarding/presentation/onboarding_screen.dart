@@ -37,7 +37,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
-        _showPermissionDeniedDialog('위치 서비스가 꺼져 있습니다.\n기기 설정에서 위치 서비스를 켜주세요.');
+        _showLocationOptionalDialog(
+          '위치 서비스가 꺼져 있습니다.\n위치 서비스를 켜면 현재 위치의 날씨를 확인할 수 있습니다.',
+        );
       }
       return;
     }
@@ -49,28 +51,34 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     if (permission == LocationPermission.denied) {
       if (mounted) {
-        _showPermissionDeniedDialog('위치 권한이 거부되었습니다.\n앱을 사용하려면 위치 권한이 필요합니다.');
+        _showLocationOptionalDialog(
+          '위치 권한이 거부되었습니다.\n위치 권한을 허용하면 현재 위치의 날씨를 확인할 수 있습니다.',
+        );
       }
       return;
     }
 
     if (permission == LocationPermission.deniedForever) {
       if (mounted) {
-        _showPermissionDeniedDialog(
-          '위치 권한이 영구적으로 거부되었습니다.\n설정에서 위치 권한을 허용해주세요.',
+        _showLocationOptionalDialog(
+          '위치 권한이 영구적으로 거부되었습니다.\n설정에서 위치 권한을 허용하면 현재 위치의 날씨를 확인할 수 있습니다.',
         );
       }
       return;
     }
 
     // 권한 허용됨 → 온보딩 완료
+    await _completeOnboarding();
+  }
+
+  Future<void> _completeOnboarding() async {
     await ref.read(onboardingRepositoryProvider.notifier).completeOnboarding();
     if (mounted) {
       context.go(Routes.home);
     }
   }
 
-  void _showPermissionDeniedDialog(String message) {
+  void _showLocationOptionalDialog(String message) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -99,7 +107,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
               const SizedBox(height: AppSpacing.large),
               const Text(
-                '위치 권한 필요',
+                '위치 권한 안내',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w400,
@@ -117,51 +125,54 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.large),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: TextButton.styleFrom(
-                        padding: AppSpacing.mediumVertical,
-                      ),
-                      child: const Text(
-                        '닫기',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF8E8E8E),
-                        ),
-                      ),
+              // 위치 없이 사용하기 버튼
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _completeOnboarding();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0E8AE4),
+                    foregroundColor: Colors.white,
+                    padding: AppSpacing.mediumVertical,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppRadius.mediumRadius,
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    '기본 위치로 시작하기',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.small),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Geolocator.openAppSettings();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0E8AE4),
-                        foregroundColor: Colors.white,
-                        padding: AppSpacing.mediumVertical,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: AppRadius.mediumRadius,
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        '설정으로',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.small),
+              // 설정으로 이동 버튼
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Geolocator.openAppSettings();
+                  },
+                  style: TextButton.styleFrom(
+                    padding: AppSpacing.mediumVertical,
+                  ),
+                  child: const Text(
+                    '설정에서 위치 권한 허용하기',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF8E8E8E),
                     ),
                   ),
-                ],
+                ),
               ),
             ],
           ),

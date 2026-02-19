@@ -1,17 +1,28 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_styles.dart';
+import '../../core/routing/routes.dart';
+import '../../location/presentation/location_search_screen.dart';
 import 'outfit_state.dart';
 import 'outfit_action.dart';
 
 class OutfitScreen extends StatefulWidget {
   final OutfitState state;
   final void Function(OutfitAction action) onAction;
+  final VoidCallback? onClearLocationError;
 
-  const OutfitScreen({super.key, required this.state, required this.onAction});
+  const OutfitScreen({
+    super.key,
+    required this.state,
+    required this.onAction,
+    this.onClearLocationError,
+  });
 
   @override
   State<OutfitScreen> createState() => _OutfitScreenState();
@@ -382,6 +393,175 @@ class _OutfitScreenState extends State<OutfitScreen> {
     );
   }
 
+  // 위치 검색 화면으로 이동
+  Future<void> _goToLocationSearch() async {
+    final result = await context.push<LocationSearchResult>(Routes.locationSearch);
+    if (result != null && mounted) {
+      widget.onAction(OutfitAction.onChangeLocation(
+        latitude: result.latitude,
+        longitude: result.longitude,
+        locationName: result.name,
+      ));
+    }
+  }
+
+  // 현재 위치 사용
+  void _useCurrentLocation() {
+    widget.onAction(const OutfitAction.onUseCurrentLocation());
+  }
+
+  @override
+  void didUpdateWidget(covariant OutfitScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // 위치 권한 에러 감지
+    if (widget.state.locationPermissionError != LocationPermissionError.none &&
+        oldWidget.state.locationPermissionError == LocationPermissionError.none) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showLocationPermissionDialog(widget.state.locationPermissionError);
+      });
+    }
+  }
+
+  // 위치 권한 다이얼로그 표시
+  void _showLocationPermissionDialog(LocationPermissionError error) {
+    String title;
+    String message;
+    String settingsButtonText;
+    VoidCallback onSettingsPressed;
+
+    switch (error) {
+      case LocationPermissionError.serviceDisabled:
+        title = '위치 서비스 꺼짐';
+        message = Platform.isIOS
+            ? '현재 위치를 사용하려면 설정에서\n위치 서비스를 켜주세요.'
+            : '현재 위치를 사용하려면 설정에서\n위치를 켜주세요.';
+        settingsButtonText = '설정으로 이동';
+        onSettingsPressed = () {
+          Navigator.pop(context);
+          widget.onClearLocationError?.call();
+          Geolocator.openLocationSettings();
+        };
+        break;
+      case LocationPermissionError.permissionDenied:
+      case LocationPermissionError.permissionDeniedForever:
+        title = '위치 권한 필요';
+        message = Platform.isIOS
+            ? '현재 위치를 사용하려면\n설정 > 개인 정보 보호 > 위치 서비스에서\n옷차림표 앱의 위치 접근을 허용해주세요.'
+            : '현재 위치를 사용하려면\n설정 > 앱 > 옷차림표 > 권한에서\n위치 권한을 허용해주세요.';
+        settingsButtonText = '설정으로 이동';
+        onSettingsPressed = () {
+          Navigator.pop(context);
+          widget.onClearLocationError?.call();
+          Geolocator.openAppSettings();
+        };
+        break;
+      case LocationPermissionError.none:
+        return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.xLargeRadius),
+        child: Container(
+          padding: AppSpacing.largeAll,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: AppRadius.xLargeRadius,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: AppSpacing.mediumAll,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0E8AE4),
+                  borderRadius: AppRadius.mediumRadius,
+                ),
+                child: const Icon(
+                  Icons.location_off_rounded,
+                  size: 48,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.large),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontFamily: 'GangwonEduPower',
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF494A4B),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.small),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'GangwonEduAll',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF8E8E8E),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.large),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        widget.onClearLocationError?.call();
+                      },
+                      style: TextButton.styleFrom(
+                        padding: AppSpacing.mediumVertical,
+                      ),
+                      child: const Text(
+                        '취소',
+                        style: TextStyle(
+                          fontFamily: 'GangwonEduAll',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF8E8E8E),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.small),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: onSettingsPressed,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0E8AE4),
+                        foregroundColor: Colors.white,
+                        padding: AppSpacing.mediumVertical,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppRadius.mediumRadius,
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        settingsButtonText,
+                        style: const TextStyle(
+                          fontFamily: 'GangwonEduAll',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // 온도 카드
   Widget _buildTemperatureCard() {
     return Container(
@@ -394,27 +574,77 @@ class _OutfitScreenState extends State<OutfitScreen> {
       ),
       child: Column(
         children: [
-          // 위치
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.location_on_rounded,
-                size: 20,
+          // 위치 (탭하여 검색)
+          InkWell(
+            onTap: _goToLocationSearch,
+            borderRadius: AppRadius.mediumRadius,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.medium,
+                vertical: AppSpacing.small,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F4FB),
+                borderRadius: AppRadius.mediumRadius,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.location_on_rounded,
+                    size: 20,
+                    color: Color(0xFF0E8AE4),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    widget.state.location,
+                    style: const TextStyle(
+                      fontFamily: 'GangwonEduAll',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF494A4B),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                    color: Color(0xFF8E8E8E),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // 현재 위치 사용 버튼 (사용자가 위치를 선택했을 때만 표시)
+          if (!widget.state.useCurrentLocation) ...[
+            const SizedBox(height: AppSpacing.small),
+            TextButton.icon(
+              onPressed: _useCurrentLocation,
+              icon: const Icon(
+                Icons.my_location_rounded,
+                size: 16,
                 color: Color(0xFF0E8AE4),
               ),
-              const SizedBox(width: 4),
-              Text(
-                widget.state.location,
-                style: const TextStyle(
+              label: const Text(
+                '현재 위치 사용',
+                style: TextStyle(
                   fontFamily: 'GangwonEduAll',
-                  fontSize: 16,
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF494A4B),
+                  color: Color(0xFF0E8AE4),
                 ),
               ),
-            ],
-          ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.small,
+                  vertical: 0,
+                ),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ],
 
           const SizedBox(height: AppSpacing.large),
 

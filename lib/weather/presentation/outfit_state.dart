@@ -6,6 +6,14 @@ part 'outfit_state.freezed.dart';
 
 enum WeatherLoadingStatus { initial, loading, success, error }
 
+/// 위치 권한 에러 타입
+enum LocationPermissionError {
+  none, // 에러 없음
+  serviceDisabled, // 위치 서비스 비활성화
+  permissionDenied, // 권한 거부됨
+  permissionDeniedForever, // 권한 영구 거부됨
+}
+
 @freezed
 class OutfitState with _$OutfitState {
   const factory OutfitState({
@@ -24,5 +32,14 @@ class OutfitState with _$OutfitState {
     @Default(0) int humidity, // 습도
     @Default(0.0) double precipitation, // 강수량
     String? weatherIcon, // 날씨 아이콘
+
+    // 사용자 선택 위치 정보
+    @Default(true) bool useCurrentLocation, // 현재 위치 사용 여부
+    double? selectedLatitude, // 선택된 위도
+    double? selectedLongitude, // 선택된 경도
+    String? selectedLocationName, // 선택된 위치 이름
+
+    // 위치 권한 에러
+    @Default(LocationPermissionError.none) LocationPermissionError locationPermissionError,
   }) = _OutfitState;
 }

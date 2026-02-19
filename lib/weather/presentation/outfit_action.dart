@@ -7,4 +7,10 @@ sealed class OutfitAction with _$OutfitAction {
   const factory OutfitAction.onChangeTemperature(double temperature) =
       OnChangeTemperature;
   const factory OutfitAction.onRefresh() = OnRefreshOutfit;
+  const factory OutfitAction.onChangeLocation({
+    required double latitude,
+    required double longitude,
+    required String locationName,
+  }) = OnChangeLocation;
+  const factory OutfitAction.onUseCurrentLocation() = OnUseCurrentLocation;
 }

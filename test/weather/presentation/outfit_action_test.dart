@@ -71,6 +71,8 @@ void main() {
         final result = switch (action) {
           OnChangeTemperature(:final temperature) => 'temp: $temperature',
           OnRefreshOutfit() => 'refresh',
+          OnChangeLocation() => 'location',
+          OnUseCurrentLocation() => 'current_location',
         };
 
         expect(result, 'temp: 25.0');
@@ -82,6 +84,8 @@ void main() {
         final result = switch (action) {
           OnChangeTemperature(:final temperature) => 'temp: $temperature',
           OnRefreshOutfit() => 'refresh',
+          OnChangeLocation() => 'location',
+          OnUseCurrentLocation() => 'current_location',
         };
 
         expect(result, 'refresh');

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../onboarding/presentation/onboarding_screen.dart';
 import '../../weather/presentation/outfit_screen_root.dart';
 import '../../weather/presentation/temperature_search_screen.dart';
+import '../../location/presentation/location_search_screen.dart';
 
 import 'routes.dart';
 
@@ -62,6 +63,17 @@ class AppRouter {
             context: context,
             state: state,
             child: const TemperatureSearchScreen(),
+          ),
+        ),
+
+        // 위치 검색 화면
+        GoRoute(
+          path: Routes.locationSearch,
+          name: Routes.locationSearchName,
+          pageBuilder: (context, state) => _buildPageWithDefaultTransition(
+            context: context,
+            state: state,
+            child: const LocationSearchScreen(),
           ),
         ),
       ],

@@ -14,6 +14,9 @@ class Routes {
   /// 온도 검색 화면
   static const String temperatureSearch = '/temperature-search';
 
+  /// 위치 검색 화면
+  static const String locationSearch = '/location-search';
+
   // ========================================
   // 추가 예정 라우트
   // ========================================
@@ -34,6 +37,7 @@ class Routes {
   static const String onboardingName = 'onboarding';
   static const String homeName = 'home';
   static const String temperatureSearchName = 'temperature-search';
+  static const String locationSearchName = 'location-search';
   static const String settingsName = 'settings';
   static const String locationSettingsName = 'location-settings';
   static const String notificationSettingsName = 'notification-settings';

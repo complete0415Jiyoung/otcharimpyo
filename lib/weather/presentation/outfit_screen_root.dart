@@ -17,6 +17,7 @@ class OutfitScreenRoot extends ConsumerWidget {
       onAction: (action) async {
         await notifier.onAction(action);
       },
+      onClearLocationError: notifier.clearLocationPermissionError,
     );
   }
 }
